@@ -1,6 +1,7 @@
 #include <zmq.hpp>
 #include <iostream>
 #include <string>
+#include "zhelpers.hpp"
 
 int main(int argc, char* argv[]) {
 
@@ -13,20 +14,14 @@ int main(int argc, char* argv[]) {
   zmq::socket_t syncclient(context, ZMQ_REQ);
   syncclient.connect("tcp://localhost:5562");
 
-  zmq::message_t message(0);
-  memcpy(message.data(), "", 0);
-  syncclient.send(message);
+  s_send(syncclient, "");
 
-  zmq::message_t request;
-  syncclient.recv(&request);
+  s_recv(syncclient);
   std::cout << "Connected to subscriber" << std::endl;
   
   int update_nbr = 0;
   while(1) {
-    subscriber.recv(&request);
-    std::cout << "received " << *(static_cast<std::string*>(request.data())) << std::endl;
-    //if (strcmp((static_cast<std::string*>(request.data())), "ENDSocket-Type") == 0) {
-    if (*(static_cast<std::string*>(request.data())) == "ENDSocket-Type") {
+    if (s_recv(subscriber).compare("END") == 0) {
       std::cout << "FINE" << std::endl;
       break;
     }

@@ -14,4 +14,4 @@ all: $(EXEC)
 	$(CXX) $(CPFLAGS) $(LDFLAGS) $(LDLIBS) -c $<
 
 clean: $(EXEC)
-	$(RM)
+	$(RM) $(EXEC)

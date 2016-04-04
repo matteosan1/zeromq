@@ -1,9 +1,10 @@
 #include <zmq.hpp>
-#include <unistd.h>
+#include "zhelpers.hpp"
 
 #include <iostream>
+#include <unistd.h>
 
-#define SUBSCRIBERS_EXPECTED 1
+#define SUBSCRIBERS_EXPECTED 10
 
 int main(int argc, char* argv[]) {
   zmq::context_t context(1);
@@ -20,26 +21,20 @@ int main(int argc, char* argv[]) {
 
   int subscribers = 0;
   while (subscribers < SUBSCRIBERS_EXPECTED) {
-    zmq::message_t request;
-    syncservice.recv(&request);
+    s_recv(syncservice);
 
     std::cout << "Added new subscriber" << std::endl;
-    zmq::message_t reply(0);
-    memcpy(reply.data(), "", 0);
-    syncservice.send(reply);
+    s_send(syncservice, "");
 
     subscribers++;
   }
 
   int update_nbr;
-  for (update_nbr=0; update_nbr<1; update_nbr++) {
-    zmq::message_t message(7);
-    memcpy(message.data(), "Rhubarb\0", 7);
-    publisher.send(message);
+  for (update_nbr=0; update_nbr<1000000; update_nbr++) {
+    s_send(publisher, "Rhubarb");
   }
-  zmq::message_t endmessage(3);
-  memcpy(endmessage.data(), "END\0", 3);
-  publisher.send(endmessage);
+
+  s_send(publisher, "END");
 
   sleep(1);
   return 0;
