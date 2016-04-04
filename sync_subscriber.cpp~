@@ -1,0 +1,33 @@
+#include <zmq.hpp>
+
+int main(int argc, char* argv[]) {
+
+  zmq::context_t context(1);
+
+  zmq::socket_t subscriber(context, ZMQ_SUB);
+  subscriber.connect("tcp://localhost:5561");
+  subscriber.setsocketopt(ZMQ_SUBSCRIBE, "", 0);
+
+  zmq::socket_t syncclient(context, ZMQ_REQ);
+  syncclient.connect("tcp://localhost:5562");
+
+  zmq::messasge_t message(0);
+  memcpy(message.data(), "", 0);
+  syncclient.send(message);
+
+  zmq::messasge_t request;
+  syncclient.recv(&request);
+
+  int update_nbr = 0;
+  while(1) {
+    subscriber.recv(request);
+    if (request.compare("END") == 0)
+      break;
+
+    update_nbr++;
+  }
+
+  std::cout << "Received " << update_nbr << "updates" << std::endl;
+
+  return 0;
+}
